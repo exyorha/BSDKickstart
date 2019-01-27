@@ -13,7 +13,6 @@ image_info:
 .text
 
 .globl _start
-.func _start
 _start:
 	ldr sp, =stack + 2048
 	ldr r4, =image_info
@@ -24,7 +23,6 @@ _start:
 	blx ulz4f
 	ldr r0, [r4, #0]
 	ldr pc, [r4, #4]
-.endfunc
 .type _start,%function
 .size _start,. - _start
 

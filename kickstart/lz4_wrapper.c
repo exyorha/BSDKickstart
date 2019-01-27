@@ -97,7 +97,9 @@ void* memcpy(void *restrict dest, const void *restrict src, size_t count) {
  * access support), we can easily write the ones we need ourselves. */
 static uint16_t LZ4_readLE16(const void *src)
 {
-	return *(uint16_t *__attribute__((packed)))src;
+  __attribute__((aligned(1))) const uint16_t *ptr = src;
+
+  return *ptr;
 }
 static void LZ4_copy8(void *dst, const void *src)
 {
@@ -211,7 +213,7 @@ size_t ulz4fn(const void *src, size_t srcn, void *dst, size_t dstn)
 		}
 
 		if (b.not_compressed) {
-			size_t size = MIN((uint32_t)b.size, dst + dstn - out);
+			size_t size = MIN((uint32_t)b.size, (uint32_t)(dst + dstn - out));
 			memcpy(out, in, size);
 			if (size < b.size)
 				break;		/* output overrun */
@@ -236,7 +238,7 @@ size_t ulz4fn(const void *src, size_t srcn, void *dst, size_t dstn)
 	return out_size;
 }
 
-size_t __attribute__((externally_visible)) ulz4f(const void *src, void *dst)
+size_t ulz4f(const void *src, void *dst)
 {
 	/* LZ4 uses signed size parameters, so can't just use ((u32)-1) here. */
 	return ulz4fn(src, 1*GiB, dst, 1*GiB);
