@@ -3,3 +3,4 @@ project(BSDKickstart)
 enable_language(ASM)
 
 add_subdirectory(kickstart)
+add_subdirectory(zynq_init)

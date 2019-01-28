@@ -7,6 +7,7 @@ image_info:
 	.long 0 @ Kernel entry point
 	.long 0 @ Compressed data base
 	.long 0 @ Uncompressed data base
+	.long 0 @ Initialization chain
 .type image_info,%object
 .size image_info,. - image_info
 
@@ -16,6 +17,22 @@ image_info:
 _start:
 	ldr sp, =stack + 2048
 	ldr r4, =image_info
+
+	ldr	r5, [r4, #16]
+	cmp	r5, #0
+	beq	1f
+
+2:
+	ldr		r6, [r5], #4
+	cmp		r6, #0
+	beq		1f
+	
+	push	{r4, r5}
+	blx		r6
+	pop		{r4, r5}
+
+1:
+
 	@ r0 - src
 	@ r1 - dst
 	ldr r0, [r4, #8]
