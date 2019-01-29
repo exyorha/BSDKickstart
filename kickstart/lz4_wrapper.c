@@ -95,29 +95,20 @@ void* memcpy(void *restrict dest, const void *restrict src, size_t count) {
  * seem to be very inefficient in practice (at least on ARM64). Since libpayload
  * knows about endinaness and allows some basic assumptions (such as unaligned
  * access support), we can easily write the ones we need ourselves. */
+
+typedef __attribute__((aligned(1))) uint16_t unaligned_uint16_t;
+typedef __attribute__((aligned(1))) uint64_t unaligned_uint32_t;
+typedef __attribute__((aligned(1))) uint64_t unaligned_uint64_t;
+
 static uint16_t LZ4_readLE16(const void *src)
 {
-  __attribute__((aligned(1))) const uint16_t *ptr = src;
+  const unaligned_uint16_t *ptr = src;
 
   return *ptr;
 }
 static void LZ4_copy8(void *dst, const void *src)
 {
-/* ARM32 needs to be a special snowflake to prevent GCC from coalescing the
- * access into LDRD/STRD (which don't support unaligned accesses). */
-#ifdef __arm__
-	uint32_t x0, x1;
-	asm volatile (
-		"ldr %[x0], [%[src]]\n\t"
-		"ldr %[x1], [%[src], #4]\n\t"
-		"str %[x0], [%[dst]]\n\t"
-		"str %[x1], [%[dst], #4]\n\t"
-		: [x0]"=r"(x0), [x1]"=r"(x1)
-		: [src]"r"(src), [dst]"r"(dst)
-		: "memory" );
-#else
-	*(uint64_t *)dst = *(const uint64_t *)src;
-#endif
+	*(unaligned_uint64_t *)dst = *(const unaligned_uint64_t *)src;
 }
 
 typedef  uint8_t BYTE;
@@ -201,7 +192,7 @@ size_t ulz4fn(const void *src, size_t srcn, void *dst, size_t dstn)
 	}
 
 	while (1) {
-		struct lz4_block_header b = { .raw = *(uint32_t *)in };
+		struct lz4_block_header b = { .raw = *(unaligned_uint32_t *)in };
 		in += sizeof(struct lz4_block_header);
 
 		if ((size_t)(in - src) + b.size > srcn)

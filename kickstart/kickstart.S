@@ -15,7 +15,28 @@ image_info:
 
 .globl _start
 _start:
-	ldr sp, =stack + 2048
+	ldr r0, =stack + 2048
+	msr		cpsr_c, #0xD1 @ FIQ mode
+	mov		sp, r0
+	sub		r0, r0, #4
+	msr		cpsr_c, #0xD2 @ IRQ mode
+	mov		sp, r0
+	sub		r0, r0, #4
+	sub		r0, r0, #4
+	msr		cpsr_c, #0xD7 @ Abort mode
+	mov		sp, r0
+	sub		r0, r0, #4
+	msr		cpsr_c, #0xDB @ Undefined mode
+	mov		sp, r0
+	sub		r0, r0, #4
+	msr		cpsr_c, #0xD3 @ SVC mode
+	mov		sp, r0
+
+  @ Enable ICache
+	mrc     p15, 0, R1, c1, c0, 0
+	orr     R1, R1, #0x00001000
+	mcr     p15, 0, R1, c1, c0, 0
+
 	ldr r4, =image_info
 
 	ldr	r5, [r4, #16]
@@ -26,7 +47,7 @@ _start:
 	ldr		r6, [r5], #4
 	cmp		r6, #0
 	beq		1f
-	
+
 	push	{r4, r5}
 	blx		r6
 	pop		{r4, r5}
@@ -37,7 +58,8 @@ _start:
 	@ r1 - dst
 	ldr r0, [r4, #8]
 	ldr r1, [r4, #12]
-	blx ulz4f
+	cmp r0, r1
+	blxne ulz4f
 	ldr r0, [r4, #0]
 	ldr pc, [r4, #4]
 .type _start,%function

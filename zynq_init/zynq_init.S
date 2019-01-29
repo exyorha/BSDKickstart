@@ -28,6 +28,7 @@ do_remap:                 @ Unlock SLCR
   str  r6,  [r8, #0x40]   @ Enable SCU & address filtering
   str  r5,  [r8, #0x0]
   dmb
+
   bx  lr
 
 .type _start, %function
