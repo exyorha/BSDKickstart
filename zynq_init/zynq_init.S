@@ -29,7 +29,7 @@ do_remap:                 @ Unlock SLCR
   str  r5,  [r8, #0x0]
   dmb
 
-  bx  lr
+  b enable_all_caches
 
 .type _start, %function
 .size _start, . - _start

@@ -60,6 +60,7 @@ _start:
 	ldr r1, [r4, #12]
 	cmp r0, r1
 	blxne ulz4f
+
 	ldr r0, [r4, #0]
 	ldr pc, [r4, #4]
 .type _start,%function

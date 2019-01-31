@@ -1,5 +1,6 @@
 add_executable(zynq_init
   zynq_init.S
+  cache_init.S
 )
 
 target_compile_options(zynq_init PRIVATE -Os -Wall -W -ffreestanding -march=armv7-a -mthumb -fPIC -fvisibility=hidden)
